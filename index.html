@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jew or False</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    --color-bg: #F6F1E6;
+    --color-bg-alt: #ECE3D2;
+    --color-card: #FFFFFF;
+    --color-ink: #262220;
+    --color-ink-soft: #6b6259;
+    --color-border: #E1D6C2;
+    --color-primary: #2C4A6E;
+    --color-primary-ink: #FFFFFF;
+    --color-gold: #A9781F;
+    --color-true: #5F7A3D;
+    --color-true-bg: #EAF0DF;
+    --color-false: #A8492F;
+    --color-false-bg: #F6E4DC;
+    --shadow-card: 0 1px 2px rgba(38,34,32,0.06), 0 8px 24px rgba(38,34,32,0.08);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-bg: #17191D;
+      --color-bg-alt: #1F2228;
+      --color-card: #21252C;
+      --color-ink: #EDE9E1;
+      --color-ink-soft: #A6A099;
+      --color-border: #33373F;
+      --color-primary: #6E93BE;
+      --color-primary-ink: #12181F;
+      --color-gold: #D6AA4E;
+      --color-true: #9CBB78;
+      --color-true-bg: #263323;
+      --color-false: #D98567;
+      --color-false-bg: #372420;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --color-bg: #17191D;
+    --color-bg-alt: #1F2228;
+    --color-card: #21252C;
+    --color-ink: #EDE9E1;
+    --color-ink-soft: #A6A099;
+    --color-border: #33373F;
+    --color-primary: #6E93BE;
+    --color-primary-ink: #12181F;
+    --color-gold: #D6AA4E;
+    --color-true: #9CBB78;
+    --color-true-bg: #263323;
+    --color-false: #D98567;
+    --color-false-bg: #372420;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background: radial-gradient(ellipse at top, var(--color-bg-alt), var(--color-bg) 60%);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    padding: 28px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-mark {
+    font-size: 26px;
+    line-height: 1;
+    transform: translateY(1px);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .tagline {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    margin: 2px 0 0;
+  }
+  .streak-badge {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    box-shadow: var(--shadow-card);
+    white-space: nowrap;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .progress .dot {
+    height: 5px;
+    flex: 1;
+    border-radius: 3px;
+    background: var(--color-border);
+    overflow: hidden;
+  }
+  .progress .dot.filled { background: var(--color-primary); }
+  .progress .dot.current {
+    background: var(--color-border);
+    position: relative;
+  }
+
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+    padding: 28px 22px;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    margin: 0 0 14px;
+  }
+
+  .statement {
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 500;
+    margin: 0 0 26px;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .choice-btn {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 14px;
+    padding: 16px 10px;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-alt);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+  .choice-btn:active { transform: scale(0.97); }
+  .choice-btn.jew:hover { border-color: var(--color-true); }
+  .choice-btn.false:hover { border-color: var(--color-false); }
+  .choice-btn:disabled { cursor: default; }
+
+  .choice-btn.jew.picked, .choice-btn.jew.reveal-correct {
+    background: var(--color-true-bg);
+    border-color: var(--color-true);
+    color: var(--color-true);
+  }
+  .choice-btn.false.picked, .choice-btn.false.reveal-correct {
+    background: var(--color-false-bg);
+    border-color: var(--color-false);
+    color: var(--color-false);
+  }
+  .choice-btn.dim { opacity: 0.45; }
+
+  .feedback {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--color-border);
+  }
+  .feedback-verdict {
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0 0 8px;
+  }
+  .feedback-verdict.correct { color: var(--color-true); }
+  .feedback-verdict.incorrect { color: var(--color-false); }
+  .feedback-explanation {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-ink);
+    margin: 0 0 20px;
+  }
+
+  .next-btn, .primary-btn {
+    width: 100%;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--color-primary);
+    color: var(--color-primary-ink);
+    cursor: pointer;
+    transition: opacity 0.12s ease;
+  }
+  .next-btn:active, .primary-btn:active { opacity: 0.85; }
+
+  .results-score {
+    text-align: center;
+    padding: 8px 0 6px;
+  }
+  .results-score .big-number {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-primary);
+  }
+  .results-score .of-five {
+    font-size: 15px;
+    color: var(--color-ink-soft);
+    margin-top: 6px;
+  }
+
+  .emoji-grid {
+    text-align: center;
+    font-size: 26px;
+    letter-spacing: 6px;
+    margin: 18px 0;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0 22px;
+    padding: 16px 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .stat { text-align: center; }
+  .stat .num {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--color-ink-soft);
+    margin-top: 2px;
+  }
+
+  .review-list { margin-top: 4px; }
+  .review-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-mark { flex-shrink: 0; font-size: 16px; }
+  .review-text .review-statement { color: var(--color-ink); }
+  .review-text .review-answer { color: var(--color-ink-soft); margin-top: 2px; }
+
+  .share-btn {
+    width: 100%;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid var(--color-primary);
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  :root:not([data-theme="light"]) .share-btn { color: var(--color-primary); }
+
+  .copied-note {
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-true);
+    margin-top: 10px;
+    height: 16px;
+  }
+
+  .beigel-link {
+    display: block;
+    text-align: center;
+    width: 100%;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 13px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-alt);
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    margin-top: 18px;
+    transition: border-color 0.12s ease, color 0.12s ease;
+  }
+  .beigel-link:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--color-ink-soft);
+  }
+  footer a { color: inherit; }
+
+  @media (max-width: 360px) {
+    .statement { font-size: 20px; }
+    .results-score .big-number { font-size: 46px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div>
+        <h1>Jew or False</h1>
+        <p class="tagline">Five statements. True or fabricated?</p>
+      </div>
+    </div>
+    <div class="streak-badge" id="streakBadge">0 day streak</div>
+  </header>
+  <main id="gameArea"></main>
+  <footer>
+    <p>A new set of five, every day.</p>
+  </footer>
+</div>
+
+<script>
+let STATEMENTS = [];
+let FESTIVALS = [];
+
+const STORAGE_KEY = 'jew-or-false-stats-v1';
+const EPOCH = new Date('2025-01-01T00:00:00Z');
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function dateFromKey(k) {
+  const [y, m, d] = k.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function keyFromDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function addDays(d, n) {
+  const copy = new Date(d);
+  copy.setDate(copy.getDate() + n);
+  return copy;
+}
+
+// Festivals block the whole calendar day. Data comes from festivals.json
+// (major Yom Tov days, diaspora two-day schedule) via the Hebcal API.
+function findFestivalForKey(k) {
+  return FESTIVALS.find(f => k >= f.start && k <= f.end) || null;
+}
+
+function isSaturdayKey(k) {
+  return dateFromKey(k).getDay() === 6;
+}
+
+// A date counts as "closed" for streak purposes if it's a festival day or
+// a Saturday (Shabbat) — both are days the site intentionally has no game,
+// so missing one shouldn't break a streak.
+function isClosedDateForStreak(k) {
+  return !!findFestivalForKey(k) || isSaturdayKey(k);
+}
+
+// Walks backward from (but not including) today, skipping closed dates,
+// to find the most recent day the game was actually playable.
+function lastOpenDayBefore(todayKeyStr) {
+  let d = dateFromKey(todayKeyStr);
+  for (let i = 0; i < 400; i++) {
+    d = addDays(d, -1);
+    const k = keyFromDate(d);
+    if (!isClosedDateForStreak(k)) return k;
+  }
+  return null;
+}
+
+// Shabbat break is a real-time window (not a full closed calendar date),
+// approximated with a fixed local-clock window rather than true sunset/
+// nightfall, which vary by location and season.
+const SHABBAT_BREAK_START_HOUR = 18; // Friday, approx candle-lighting
+const SHABBAT_BREAK_END_HOUR = 20;   // Saturday, approx Havdalah
+function isShabbatBreakNow() {
+  const now = new Date();
+  const dow = now.getDay();
+  const hour = now.getHours();
+  if (dow === 5 && hour >= SHABBAT_BREAK_START_HOUR) return true;
+  if (dow === 6 && hour < SHABBAT_BREAK_END_HOUR) return true;
+  return false;
+}
+
+function dayNumber() {
+  const now = new Date();
+  const utcToday = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.floor((utcToday - EPOCH.getTime()) / 86400000);
+  return diff + 1;
+}
+
+function seedFromDateKey(key) {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) {
+    h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffleWithRng(arr, rng) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getTodaysStatements() {
+  const key = todayKey();
+  const rng = mulberry32(seedFromDateKey(key));
+  const byCategory = {};
+  STATEMENTS.forEach(s => {
+    (byCategory[s.category] = byCategory[s.category] || []).push(s);
+  });
+  const categories = shuffleWithRng(Object.keys(byCategory), rng).slice(0, 5);
+  return categories.map(cat => {
+    const pool = shuffleWithRng(byCategory[cat], rng);
+    return pool[0];
+  });
+}
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { currentStreak: 0, maxStreak: 0, played: 0, totalCorrect: 0, lastPlayedDate: null, history: {} };
+    return JSON.parse(raw);
+  } catch (e) {
+    return { currentStreak: 0, maxStreak: 0, played: 0, totalCorrect: 0, lastPlayedDate: null, history: {} };
+  }
+}
+
+function saveStats(stats) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch (e) {}
+}
+
+let stats = loadStats();
+const gameArea = document.getElementById('gameArea');
+const streakBadge = document.getElementById('streakBadge');
+
+function updateStreakBadge() {
+  const n = stats.currentStreak;
+  streakBadge.textContent = n === 1 ? '1 day streak' : n + ' day streak';
+}
+updateStreakBadge();
+
+const key = todayKey();
+const puzzleNum = dayNumber();
+let todaysStatements = [];
+
+let currentIndex = 0;
+let answers = [];
+
+function renderProgress() {
+  const dots = [];
+  for (let i = 0; i < 5; i++) {
+    let cls = 'dot';
+    if (i < currentIndex) cls += ' filled';
+    dots.push('<div class="' + cls + '"></div>');
+  }
+  return '<div class="progress">' + dots.join('') + '</div>';
+}
+
+function renderQuestion() {
+  const s = todaysStatements[currentIndex];
+  gameArea.innerHTML =
+    renderProgress() +
+    '<div class="card">' +
+      '<p class="eyebrow">Statement ' + (currentIndex + 1) + ' of 5</p>' +
+      '<p class="statement">' + s.statement + '</p>' +
+      '<div class="choices">' +
+        '<button class="choice-btn jew" id="btnJew">Jew</button>' +
+        '<button class="choice-btn false" id="btnFalse">False</button>' +
+      '</div>' +
+      '<div id="feedbackSlot"></div>' +
+    '</div>';
+
+  document.getElementById('btnJew').addEventListener('click', () => handleAnswer(true, s));
+  document.getElementById('btnFalse').addEventListener('click', () => handleAnswer(false, s));
+}
+
+function handleAnswer(pickedTrue, s) {
+  const correct = pickedTrue === s.isTrue;
+  answers.push({ statement: s.statement, isTrue: s.isTrue, picked: pickedTrue, correct: correct, explanation: s.explanation });
+
+  const jewBtn = document.getElementById('btnJew');
+  const falseBtn = document.getElementById('btnFalse');
+  jewBtn.disabled = true;
+  falseBtn.disabled = true;
+
+  const correctBtn = s.isTrue ? jewBtn : falseBtn;
+  const pickedBtn = pickedTrue ? jewBtn : falseBtn;
+
+  correctBtn.classList.add('reveal-correct');
+  if (pickedBtn !== correctBtn) {
+    pickedBtn.classList.add('picked');
+  } else {
+    pickedBtn.classList.add('picked');
+  }
+  [jewBtn, falseBtn].forEach(b => { if (!b.classList.contains('picked') && !b.classList.contains('reveal-correct')) b.classList.add('dim'); });
+
+  const slot = document.getElementById('feedbackSlot');
+  slot.innerHTML =
+    '<div class="feedback">' +
+      '<p class="feedback-verdict ' + (correct ? 'correct' : 'incorrect') + '">' + (correct ? 'Correct.' : 'Not quite.') + '</p>' +
+      '<p class="feedback-explanation">' + s.explanation + '</p>' +
+      '<button class="next-btn" id="nextBtn">' + (currentIndex < 4 ? 'Next statement' : 'See results') + '</button>' +
+    '</div>';
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    currentIndex++;
+    if (currentIndex < 5) {
+      renderQuestion();
+    } else {
+      finishGame();
+    }
+  });
+}
+
+function finishGame() {
+  const score = answers.filter(a => a.correct).length;
+
+  const continuesStreak = stats.lastPlayedDate === lastOpenDayBefore(key);
+  const alreadyToday = stats.lastPlayedDate === key;
+  if (!alreadyToday) {
+    stats.currentStreak = continuesStreak ? stats.currentStreak + 1 : 1;
+    stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+    stats.played += 1;
+    stats.totalCorrect += score;
+    stats.lastPlayedDate = key;
+    stats.history[key] = { score, answers };
+    saveStats(stats);
+  }
+  updateStreakBadge();
+  renderResults(score, answers);
+}
+
+const RESULT_MESSAGES = {
+  0: ['Oy vey.', 'Oy gevalt — not your day.', 'Zero for five. Even a coin flip does better.', 'Rock bottom. Onward and upward.'],
+  1: ['Oy vey, rough one.', "One's still one — progress, sort of.", 'A single bright spot in there.', 'Could be worse. Could always be worse.'],
+  2: ["A coin flip would've done as well.", 'The statements won this round.', 'Room to learn something new.', 'Halfway to halfway there.'],
+  3: ['Solid instincts.', "More right than wrong — we'll take it.", 'A respectable showing.', 'Middle of the pack, and proud of it.'],
+  4: ['So close to perfect!', 'One away from a clean sweep.', 'Sharp instincts today.', 'Kol hakavod — nearly flawless.'],
+  5: ['Mazel tov! Perfect set.', 'Shkoyach — a perfect five.', 'Kol hakavod, perfect score!', 'Flawless. Take a bow.'],
+};
+
+function resultMessage(score) {
+  const pool = RESULT_MESSAGES[score];
+  const rng = mulberry32(seedFromDateKey(key + '-msg'));
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+function buildShareText(score, answersArr) {
+  const grid = answersArr.map(a => a.correct ? '\u{1F7E9}' : '\u{1F7E5}').join('');
+  return 'Jew or False #' + puzzleNum + ' — ' + score + '/5\n' + grid;
+}
+
+function renderResults(score, answersArr) {
+  const grid = answersArr.map(a => a.correct ? '🟩' : '🟥').join(' ');
+  const avg = stats.played > 0 ? Math.round((stats.totalCorrect / (stats.played * 5)) * 100) : 0;
+
+  const reviewHtml = answersArr.map(a => {
+    const mark = a.correct ? '🟩' : '🟥';
+    const answerLabel = a.isTrue ? 'True' : 'False';
+    return '<div class="review-item">' +
+      '<span class="review-mark">' + mark + '</span>' +
+      '<div class="review-text">' +
+        '<div class="review-statement">' + a.statement + '</div>' +
+        '<div class="review-answer">Answer: ' + answerLabel + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  gameArea.innerHTML =
+    '<div class="card">' +
+      '<p class="eyebrow">Puzzle #' + puzzleNum + '</p>' +
+      '<div class="results-score">' +
+        '<div class="big-number">' + score + '/5</div>' +
+        '<div class="of-five">' + resultMessage(score) + '</div>' +
+      '</div>' +
+      '<div class="emoji-grid">' + grid + '</div>' +
+      '<div class="stats-row">' +
+        '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak</div></div>' +
+        '<div class="stat"><div class="num">' + avg + '%</div><div class="label">Accuracy</div></div>' +
+      '</div>' +
+      '<button class="share-btn" id="shareBtn">Copy result to share</button>' +
+      '<div class="copied-note" id="copiedNote"></div>' +
+      '<div class="review-list">' + reviewHtml + '</div>' +
+      '<a class="beigel-link" href="https://buymeacoffee.com/jeworfalse" target="_blank" rel="noopener">Help my beigel fund 🥯</a>' +
+    '</div>';
+
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const text = buildShareText(score, answersArr).replace(/\\n/g, '\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      document.getElementById('copiedNote').textContent = 'Copied to clipboard.';
+    } catch (e) {
+      document.getElementById('copiedNote').textContent = text;
+    }
+  });
+}
+
+function renderLoading() {
+  gameArea.innerHTML = '<div class="card"><p class="eyebrow">Loading today\'s statements&hellip;</p></div>';
+}
+
+function formatBackDate(k) {
+  return dateFromKey(k).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+function renderFestivalClosed(festival) {
+  const backKey = keyFromDate(addDays(dateFromKey(festival.end), 1));
+  gameArea.innerHTML =
+    '<div class="card">' +
+      '<p class="eyebrow">Chag Sameach</p>' +
+      '<p class="statement">It\'s ' + festival.name + ' — a day of rest, so there\'s no puzzle today.</p>' +
+      '<div class="stats-row">' +
+        '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak (safe)</div></div>' +
+      '</div>' +
+      '<div class="copied-note" style="height:auto;">Back ' + formatBackDate(backKey) + '.</div>' +
+    '</div>';
+}
+
+function renderShabbatBreak() {
+  gameArea.innerHTML =
+    '<div class="card">' +
+      '<p class="eyebrow">Shabbat Shalom</p>' +
+      '<p class="statement">The site is taking a break for Shabbat — no puzzle until after Havdalah.</p>' +
+      '<div class="stats-row">' +
+        '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak (safe)</div></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function renderLoadError() {
+  gameArea.innerHTML =
+    '<div class="card">' +
+      '<p class="eyebrow">Something went wrong</p>' +
+      '<p class="statement">Couldn\'t load today\'s statements. Check your connection and try again.</p>' +
+      '<button class="primary-btn" id="retryBtn">Retry</button>' +
+    '</div>';
+  document.getElementById('retryBtn').addEventListener('click', init);
+}
+
+async function init() {
+  renderLoading();
+  try {
+    const res = await fetch('festivals.json');
+    if (!res.ok) throw new Error('Failed to fetch festivals.json: ' + res.status);
+    FESTIVALS = await res.json();
+  } catch (e) {
+    FESTIVALS = []; // fail open: don't block the game over a festival-data hiccup
+  }
+
+  const festival = findFestivalForKey(key);
+  if (festival) {
+    renderFestivalClosed(festival);
+    return;
+  }
+  if (isShabbatBreakNow()) {
+    renderShabbatBreak();
+    return;
+  }
+
+  try {
+    const res = await fetch('statements.json');
+    if (!res.ok) throw new Error('Failed to fetch statements.json: ' + res.status);
+    STATEMENTS = await res.json();
+  } catch (e) {
+    renderLoadError();
+    return;
+  }
+
+  todaysStatements = getTodaysStatements();
+
+  const alreadyToday = stats.lastPlayedDate === key;
+  if (alreadyToday && stats.history[key]) {
+    const entry = stats.history[key];
+    renderResults(entry.score, entry.answers);
+  } else {
+    renderQuestion();
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jew or False — statement bank browser</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #F6F1E6;
+    --card: #FFFFFF;
+    --ink: #262220;
+    --ink-soft: #6b6259;
+    --border: #E1D6C2;
+    --true: #5F7A3D;
+    --true-bg: #EAF0DF;
+    --false: #A8492F;
+    --false-bg: #F6E4DC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17191D;
+      --card: #21252C;
+      --ink: #EDE9E1;
+      --ink-soft: #A6A099;
+      --border: #33373F;
+      --true: #9CBB78;
+      --true-bg: #263323;
+      --false: #D98567;
+      --false-bg: #372420;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    margin: 0;
+    padding: 20px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--ink-soft); font-size: 13px; margin: 0 0 18px; }
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 10px 0;
+    z-index: 1;
+  }
+  input, select {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+  }
+  input[type="search"] { flex: 1; min-width: 180px; }
+  .count { font-size: 13px; color: var(--ink-soft); margin-bottom: 12px; }
+  .pair {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .pair-meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .stmt {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .tag {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    height: fit-content;
+  }
+  .tag.true { background: var(--true-bg); color: var(--true); }
+  .tag.false { background: var(--false-bg); color: var(--false); }
+  .explanation {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Jew or False — statement bank</h1>
+  <p class="sub">Browse every statement pair currently in <code>statements.json</code>.</p>
+  <div class="controls">
+    <select id="categoryFilter"><option value="">All categories</option></select>
+    <input id="search" type="search" placeholder="Search statement text...">
+  </div>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+</div>
+
+<script>
+let ALL = [];
+let PAIRS = [];
+
+async function init() {
+  const res = await fetch('statements.json');
+  ALL = await res.json();
+
+  const byPair = {};
+  ALL.forEach(s => {
+    const key = s.pairId ?? ('solo-' + s.id);
+    (byPair[key] = byPair[key] || []).push(s);
+  });
+  PAIRS = Object.values(byPair).map(items => {
+    const trueS = items.find(i => i.isTrue) || null;
+    const falseS = items.find(i => !i.isTrue) || null;
+    return { pairId: items[0].pairId, category: items[0].category, trueS, falseS };
+  }).sort((a, b) => (a.pairId ?? 0) - (b.pairId ?? 0));
+
+  const categories = [...new Set(PAIRS.map(p => p.category))].sort();
+  const sel = document.getElementById('categoryFilter');
+  categories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c + ' (' + PAIRS.filter(p => p.category === c).length + ')';
+    sel.appendChild(opt);
+  });
+
+  document.getElementById('categoryFilter').addEventListener('change', render);
+  document.getElementById('search').addEventListener('input', render);
+  render();
+}
+
+function render() {
+  const cat = document.getElementById('categoryFilter').value;
+  const q = document.getElementById('search').value.trim().toLowerCase();
+
+  const filtered = PAIRS.filter(p => {
+    if (cat && p.category !== cat) return false;
+    if (q) {
+      const text = (p.trueS ? p.trueS.statement : '') + ' ' + (p.falseS ? p.falseS.statement : '');
+      if (!text.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('count').textContent =
+    filtered.length + ' pair' + (filtered.length === 1 ? '' : 's') + ' shown (' + ALL.length + ' statements total in bank)';
+
+  document.getElementById('list').innerHTML = filtered.map(p => {
+    const explanation = (p.trueS || p.falseS).explanation;
+    return `
+    <div class="pair">
+      <div class="pair-meta">${p.category}${p.pairId != null ? ' · pair ' + p.pairId : ' · standalone'}</div>
+      ${p.trueS ? `<div class="stmt"><span class="tag true">TRUE</span><span>${escapeHtml(p.trueS.statement)}</span></div>` : ''}
+      ${p.falseS ? `<div class="stmt"><span class="tag false">FALSE</span><span>${escapeHtml(p.falseS.statement)}</span></div>` : ''}
+      <div class="explanation">${escapeHtml(explanation)}</div>
+    </div>
+  `;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+init();
+</script>
+</body>
+</html>

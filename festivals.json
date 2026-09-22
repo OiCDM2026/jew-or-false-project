@@ -1,0 +1,352 @@
+[
+  {
+    "name": "Passover",
+    "start": "2025-04-13",
+    "end": "2025-04-14"
+  },
+  {
+    "name": "Passover",
+    "start": "2025-04-19",
+    "end": "2025-04-20"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2025-06-02",
+    "end": "2025-06-03"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2025-09-23",
+    "end": "2025-09-24"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2025-10-02",
+    "end": "2025-10-02"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2025-10-07",
+    "end": "2025-10-08"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2025-10-14",
+    "end": "2025-10-15"
+  },
+  {
+    "name": "Passover",
+    "start": "2026-04-02",
+    "end": "2026-04-03"
+  },
+  {
+    "name": "Passover",
+    "start": "2026-04-08",
+    "end": "2026-04-09"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2026-05-22",
+    "end": "2026-05-23"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2026-09-12",
+    "end": "2026-09-13"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2026-09-21",
+    "end": "2026-09-21"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2026-09-26",
+    "end": "2026-09-27"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2026-10-03",
+    "end": "2026-10-04"
+  },
+  {
+    "name": "Passover",
+    "start": "2027-04-22",
+    "end": "2027-04-23"
+  },
+  {
+    "name": "Passover",
+    "start": "2027-04-28",
+    "end": "2027-04-29"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2027-06-11",
+    "end": "2027-06-12"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2027-10-02",
+    "end": "2027-10-03"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2027-10-11",
+    "end": "2027-10-11"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2027-10-16",
+    "end": "2027-10-17"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2027-10-23",
+    "end": "2027-10-24"
+  },
+  {
+    "name": "Passover",
+    "start": "2028-04-11",
+    "end": "2028-04-12"
+  },
+  {
+    "name": "Passover",
+    "start": "2028-04-17",
+    "end": "2028-04-18"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2028-05-31",
+    "end": "2028-06-01"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2028-09-21",
+    "end": "2028-09-22"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2028-09-30",
+    "end": "2028-09-30"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2028-10-05",
+    "end": "2028-10-06"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2028-10-12",
+    "end": "2028-10-13"
+  },
+  {
+    "name": "Passover",
+    "start": "2029-03-31",
+    "end": "2029-04-01"
+  },
+  {
+    "name": "Passover",
+    "start": "2029-04-06",
+    "end": "2029-04-07"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2029-05-20",
+    "end": "2029-05-21"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2029-09-10",
+    "end": "2029-09-11"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2029-09-19",
+    "end": "2029-09-19"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2029-09-24",
+    "end": "2029-09-25"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2029-10-01",
+    "end": "2029-10-02"
+  },
+  {
+    "name": "Passover",
+    "start": "2030-04-18",
+    "end": "2030-04-19"
+  },
+  {
+    "name": "Passover",
+    "start": "2030-04-24",
+    "end": "2030-04-25"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2030-06-07",
+    "end": "2030-06-08"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2030-09-28",
+    "end": "2030-09-29"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2030-10-07",
+    "end": "2030-10-07"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2030-10-12",
+    "end": "2030-10-13"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2030-10-19",
+    "end": "2030-10-20"
+  },
+  {
+    "name": "Passover",
+    "start": "2031-04-08",
+    "end": "2031-04-09"
+  },
+  {
+    "name": "Passover",
+    "start": "2031-04-14",
+    "end": "2031-04-15"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2031-05-28",
+    "end": "2031-05-29"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2031-09-18",
+    "end": "2031-09-19"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2031-09-27",
+    "end": "2031-09-27"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2031-10-02",
+    "end": "2031-10-03"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2031-10-09",
+    "end": "2031-10-10"
+  },
+  {
+    "name": "Passover",
+    "start": "2032-03-27",
+    "end": "2032-03-28"
+  },
+  {
+    "name": "Passover",
+    "start": "2032-04-02",
+    "end": "2032-04-03"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2032-05-16",
+    "end": "2032-05-17"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2032-09-06",
+    "end": "2032-09-07"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2032-09-15",
+    "end": "2032-09-15"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2032-09-20",
+    "end": "2032-09-21"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2032-09-27",
+    "end": "2032-09-28"
+  },
+  {
+    "name": "Passover",
+    "start": "2033-04-14",
+    "end": "2033-04-15"
+  },
+  {
+    "name": "Passover",
+    "start": "2033-04-20",
+    "end": "2033-04-21"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2033-06-03",
+    "end": "2033-06-04"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2033-09-24",
+    "end": "2033-09-25"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2033-10-03",
+    "end": "2033-10-03"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2033-10-08",
+    "end": "2033-10-09"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2033-10-15",
+    "end": "2033-10-16"
+  },
+  {
+    "name": "Passover",
+    "start": "2034-04-04",
+    "end": "2034-04-05"
+  },
+  {
+    "name": "Passover",
+    "start": "2034-04-10",
+    "end": "2034-04-11"
+  },
+  {
+    "name": "Shavuot",
+    "start": "2034-05-24",
+    "end": "2034-05-25"
+  },
+  {
+    "name": "Rosh Hashanah",
+    "start": "2034-09-14",
+    "end": "2034-09-15"
+  },
+  {
+    "name": "Yom Kippur",
+    "start": "2034-09-23",
+    "end": "2034-09-23"
+  },
+  {
+    "name": "Sukkot",
+    "start": "2034-09-28",
+    "end": "2034-09-29"
+  },
+  {
+    "name": "Shemini Atzeret / Simchat Torah",
+    "start": "2034-10-05",
+    "end": "2034-10-06"
+  }
+]
