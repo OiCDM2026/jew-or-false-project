@@ -515,11 +515,15 @@ function isShabbatBreakNow() {
   return false;
 }
 
-function dayNumber() {
-  const now = new Date();
-  const utcToday = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff = Math.floor((utcToday - EPOCH.getTime()) / 86400000);
+function dayNumberForKey(k) {
+  const [y, m, dd] = k.split('-').map(Number);
+  const utcDay = Date.UTC(y, m - 1, dd);
+  const diff = Math.floor((utcDay - EPOCH.getTime()) / 86400000);
   return diff + 1;
+}
+
+function dayNumber() {
+  return dayNumberForKey(todayKey());
 }
 
 function seedFromDateKey(key) {
@@ -548,18 +552,73 @@ function shuffleWithRng(arr, rng) {
   return a;
 }
 
+const NO_REPEAT_DAYS = 30;
+
+// A statement's "group" is its pair (true+false share one underlying fact),
+// or its own id for the handful of legacy standalone statements with no
+// pairId — those must never be treated as interchangeable with each other.
+function statementGroupKey(s) {
+  return s.pairId != null ? ('p' + s.pairId) : ('s' + s.id);
+}
+
+// Deterministically replays every day since launch (EPOCH) to build up which
+// statement-groups were shown in the trailing NO_REPEAT_DAYS window, so
+// today's picks can avoid repeating anything from the last month. This is a
+// pure function of the current STATEMENTS array and today's date — nothing
+// is stored server-side. Cheap even over years of daily replay (a handful of
+// array shuffles per simulated day).
 function getTodaysStatements() {
-  const key = todayKey();
-  const rng = mulberry32(seedFromDateKey(key));
   const byCategory = {};
   STATEMENTS.forEach(s => {
     (byCategory[s.category] = byCategory[s.category] || []).push(s);
   });
-  const categories = shuffleWithRng(Object.keys(byCategory), rng).slice(0, 5);
-  return categories.map(cat => {
-    const pool = shuffleWithRng(byCategory[cat], rng);
-    return pool[0];
-  });
+
+  const totalDays = dayNumberForKey(todayKey());
+  const history = []; // oldest -> newest, each entry: array of group keys shown that day
+  let cursor = new Date(EPOCH);
+  let todaysPicks = [];
+
+  for (let dayIdx = 1; dayIdx <= totalDays; dayIdx++) {
+    const dKey = keyFromDate(cursor);
+    const rng = mulberry32(seedFromDateKey(dKey));
+
+    const excluded = new Set();
+    const windowStart = Math.max(0, history.length - NO_REPEAT_DAYS);
+    for (let i = windowStart; i < history.length; i++) {
+      history[i].forEach(gk => excluded.add(gk));
+    }
+
+    const categories = shuffleWithRng(Object.keys(byCategory), rng);
+    const picked = [];
+    const usedToday = new Set();
+
+    for (const cat of categories) {
+      if (picked.length >= 5) break;
+      const pool = shuffleWithRng(byCategory[cat], rng);
+      const choice = pool.find(s => !excluded.has(statementGroupKey(s)) && !usedToday.has(statementGroupKey(s)));
+      if (!choice) continue; // nothing fresh in this category right now — skip it, try another
+      picked.push(choice);
+      usedToday.add(statementGroupKey(choice));
+    }
+
+    // Fallback (only matters for a very small bank): if categories ran out
+    // of 30-day-fresh options before reaching 5, relax to "not already
+    // picked today" so the game never breaks.
+    if (picked.length < 5) {
+      for (const cat of categories) {
+        if (picked.length >= 5) break;
+        const pool = shuffleWithRng(byCategory[cat], rng);
+        const choice = pool.find(s => !usedToday.has(statementGroupKey(s)));
+        if (choice) { picked.push(choice); usedToday.add(statementGroupKey(choice)); }
+      }
+    }
+
+    history.push(picked.map(statementGroupKey));
+    todaysPicks = picked;
+    cursor = addDays(cursor, 1);
+  }
+
+  return todaysPicks;
 }
 
 function loadStats() {
