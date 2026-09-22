@@ -284,6 +284,46 @@
     margin-top: 2px;
   }
 
+  .score-chart { margin: 4px 0 20px; }
+  .score-chart-title {
+    font-size: 12.5px;
+    color: var(--color-ink-soft);
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .score-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 90px;
+  }
+  .score-chart-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  .score-chart-pct {
+    font-size: 10.5px;
+    color: var(--color-ink-soft);
+    margin-bottom: 4px;
+  }
+  .score-chart-bar {
+    width: 100%;
+    max-width: 28px;
+    border-radius: 5px 5px 0 0;
+    background: var(--color-border);
+    min-height: 3px;
+  }
+  .score-chart-bar.mine { background: var(--color-primary); }
+  .score-chart-label {
+    font-size: 12px;
+    color: var(--color-ink-soft);
+    margin-top: 6px;
+  }
+
   .review-list { margin-top: 4px; }
   .review-item {
     display: flex;
@@ -600,9 +640,18 @@ function finishGame() {
     stats.lastPlayedDate = key;
     stats.history[key] = { score, answers };
     saveStats(stats);
+    submitScore(key, score);
   }
   updateStreakBadge();
   renderResults(score, answers);
+}
+
+function submitScore(dateKey, scoreVal) {
+  fetch('/api/submit-score', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date: dateKey, score: scoreVal }),
+  }).catch(() => {});
 }
 
 const RESULT_MESSAGES = {
@@ -653,6 +702,7 @@ function renderResults(score, answersArr) {
         '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak</div></div>' +
         '<div class="stat"><div class="num">' + avg + '%</div><div class="label">Accuracy</div></div>' +
       '</div>' +
+      '<div id="scoreChartSlot"></div>' +
       '<button class="share-btn" id="shareBtn">Copy result to share</button>' +
       '<div class="copied-note" id="copiedNote"></div>' +
       '<div class="review-list">' + reviewHtml + '</div>' +
@@ -668,6 +718,45 @@ function renderResults(score, answersArr) {
       document.getElementById('copiedNote').textContent = text;
     }
   });
+
+  loadAndRenderChart(key, score);
+}
+
+async function loadAndRenderChart(dateKey, myScore) {
+  const slot = document.getElementById('scoreChartSlot');
+  if (!slot) return;
+  try {
+    const res = await fetch('/api/distribution?date=' + encodeURIComponent(dateKey));
+    if (!res.ok) throw new Error('bad response');
+    const { counts, total } = await res.json();
+    slot.innerHTML = renderScoreChartHtml(counts, total, myScore);
+  } catch (e) {
+    slot.innerHTML = ''; // no backend available (e.g. local static preview) — fail silently
+  }
+}
+
+function renderScoreChartHtml(counts, total, myScore) {
+  const max = Math.max(1, ...[0, 1, 2, 3, 4, 5].map(s => counts[s] || 0));
+  const bars = [0, 1, 2, 3, 4, 5].map(s => {
+    const c = counts[s] || 0;
+    const pct = total > 0 ? Math.round((c / total) * 100) : 0;
+    const heightPct = Math.max(Math.round((c / max) * 100), 3);
+    const mineClass = s === myScore ? ' mine' : '';
+    return (
+      '<div class="score-chart-col">' +
+        '<div class="score-chart-pct">' + pct + '%</div>' +
+        '<div class="score-chart-bar' + mineClass + '" style="height:' + heightPct + '%"></div>' +
+        '<div class="score-chart-label">' + s + '</div>' +
+      '</div>'
+    );
+  }).join('');
+  const countLabel = total > 0 ? ' (' + total + (total === 1 ? ' player' : ' players') + ')' : '';
+  return (
+    '<div class="score-chart">' +
+      '<p class="score-chart-title">How everyone scored today' + countLabel + '</p>' +
+      '<div class="score-chart-bars">' + bars + '</div>' +
+    '</div>'
+  );
 }
 
 function renderLoading() {
