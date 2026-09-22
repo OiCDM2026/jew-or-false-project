@@ -119,6 +119,15 @@
     letter-spacing: -0.01em;
     margin: 0;
   }
+  .j-wrap { position: relative; display: inline-block; }
+  .kippah {
+    position: absolute;
+    width: 15px;
+    height: auto;
+    top: -3px;
+    left: 60%;
+    transform: translateX(-50%) rotate(-6deg);
+  }
   .tagline {
     font-size: 13px;
     color: var(--color-ink-soft);
@@ -419,7 +428,7 @@
   <header>
     <div class="brand">
       <div>
-        <h1>Jew or False</h1>
+        <h1><span class="j-wrap">J<svg class="kippah" viewBox="0 0 32 20" aria-hidden="true"><path d="M2,18 A14,16 0 0 1 30,18 Z" fill="var(--color-primary)" stroke="var(--color-gold)" stroke-width="1.5"/><ellipse cx="13" cy="9" rx="5" ry="3" fill="#ffffff" opacity="0.18"/></svg></span>ew or False</h1>
         <p class="tagline">Five statements. True or fabricated?</p>
       </div>
     </div>
