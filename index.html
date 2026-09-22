@@ -285,6 +285,14 @@
   }
 
   .score-chart { margin: 4px 0 20px; }
+  .score-chart-headline {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-align: center;
+    margin: 0 0 6px;
+  }
   .score-chart-title {
     font-size: 12.5px;
     color: var(--color-ink-soft);
@@ -735,6 +743,14 @@ async function loadAndRenderChart(dateKey, myScore) {
   }
 }
 
+function percentileMessage(counts, total, myScore) {
+  if (total <= 1) return "You're the first to play today!";
+  let scoredLess = 0;
+  for (let s = 0; s < myScore; s++) scoredLess += counts[s] || 0;
+  const pct = Math.round((scoredLess / total) * 100);
+  return 'You scored better than ' + pct + '% of today\'s players.';
+}
+
 function renderScoreChartHtml(counts, total, myScore) {
   const max = Math.max(1, ...[0, 1, 2, 3, 4, 5].map(s => counts[s] || 0));
   const bars = [0, 1, 2, 3, 4, 5].map(s => {
@@ -753,6 +769,7 @@ function renderScoreChartHtml(counts, total, myScore) {
   const countLabel = total > 0 ? ' (' + total + (total === 1 ? ' player' : ' players') + ')' : '';
   return (
     '<div class="score-chart">' +
+      '<p class="score-chart-headline">' + percentileMessage(counts, total, myScore) + '</p>' +
       '<p class="score-chart-title">How everyone scored today' + countLabel + '</p>' +
       '<div class="score-chart-bars">' + bars + '</div>' +
     '</div>'
