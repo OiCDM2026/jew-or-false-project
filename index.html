@@ -21,8 +21,21 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Self-hosted rather than Google Fonts: Google always serves Fraunces
+     with its "WONK" axis on (the default named instances are baked that
+     way), which gives some letters, notably f, an unusually curly
+     flourish. Self-hosting lets us pin WONK off for calmer letterforms
+     while keeping the rest of Fraunces' character. */
+  @font-face {
+    font-family: 'Fraunces';
+    src: url('fonts/Fraunces-Variable.woff2') format('woff2-variations'),
+         url('fonts/Fraunces-Variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
   :root {
     box-sizing: border-box;
     --color-bg: #F6F1E6;
@@ -119,6 +132,7 @@
   }
   h1 {
     font-family: var(--font-display);
+    font-variation-settings: 'WONK' 0;
     font-weight: 600;
     font-size: 26px;
     letter-spacing: -0.01em;
@@ -190,6 +204,7 @@
 
   .statement {
     font-family: var(--font-display);
+    font-variation-settings: 'WONK' 0;
     font-size: 22px;
     line-height: 1.4;
     font-weight: 500;
@@ -270,6 +285,7 @@
   }
   .results-score .big-number {
     font-family: var(--font-display);
+    font-variation-settings: 'WONK' 0;
     font-size: 56px;
     font-weight: 700;
     line-height: 1;
@@ -299,6 +315,7 @@
   .stat { text-align: center; }
   .stat .num {
     font-family: var(--font-display);
+    font-variation-settings: 'WONK' 0;
     font-size: 22px;
     font-weight: 600;
   }
@@ -311,6 +328,7 @@
   .score-chart { margin: 4px 0 20px; }
   .score-chart-headline {
     font-family: var(--font-display);
+    font-variation-settings: 'WONK' 0;
     font-size: 16px;
     font-weight: 600;
     color: var(--color-ink);
@@ -766,7 +784,7 @@ function resultMessage(score) {
 
 function buildShareText(score, answersArr) {
   const grid = answersArr.map(a => a.correct ? '\u{1F7E9}' : '\u{1F7E5}').join('');
-  return 'Jew or False #' + puzzleNum + ' — ' + score + '/5\n' + grid;
+  return 'Jew or False #' + puzzleNum + ' — ' + score + '/5\n' + grid + '\nhttps://jew-or-false.com';
 }
 
 function renderResults(score, answersArr, submitPromise) {
