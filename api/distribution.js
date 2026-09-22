@@ -32,7 +32,10 @@ module.exports = async (req, res) => {
     }
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
-    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=60');
+    // This endpoint shows live counts; caching it (even briefly) is what
+    // caused the very bug it exists to avoid — a player seeing themselves
+    // undercounted because a cached response predates their own submission.
+    res.setHeader('Cache-Control', 'no-store');
     res.status(200).json({ counts, total });
   } catch (e) {
     res.status(502).json({ error: 'Failed to fetch distribution' });

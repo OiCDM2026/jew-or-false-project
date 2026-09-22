@@ -723,6 +723,7 @@ function finishGame() {
 
   const continuesStreak = stats.lastPlayedDate === lastOpenDayBefore(key);
   const alreadyToday = stats.lastPlayedDate === key;
+  let submitPromise = null;
   if (!alreadyToday) {
     stats.currentStreak = continuesStreak ? stats.currentStreak + 1 : 1;
     stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
@@ -731,14 +732,17 @@ function finishGame() {
     stats.lastPlayedDate = key;
     stats.history[key] = { score, answers };
     saveStats(stats);
-    submitScore(key, score);
+    submitPromise = submitScore(key, score);
   }
   updateStreakBadge();
-  renderResults(score, answers);
+  // Score/results render immediately (no waiting); only the chart, further
+  // down, waits on submitPromise so it never undercounts the player's own
+  // just-submitted score against a race with their own request.
+  renderResults(score, answers, submitPromise);
 }
 
 function submitScore(dateKey, scoreVal) {
-  fetch('/api/submit-score', {
+  return fetch('/api/submit-score', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ date: dateKey, score: scoreVal }),
@@ -765,7 +769,7 @@ function buildShareText(score, answersArr) {
   return 'Jew or False #' + puzzleNum + ' — ' + score + '/5\n' + grid;
 }
 
-function renderResults(score, answersArr) {
+function renderResults(score, answersArr, submitPromise) {
   const grid = answersArr.map(a => a.correct ? '🟩' : '🟥').join(' ');
   const avg = stats.played > 0 ? Math.round((stats.totalCorrect / (stats.played * 5)) * 100) : 0;
 
@@ -810,14 +814,18 @@ function renderResults(score, answersArr) {
     }
   });
 
-  loadAndRenderChart(key, score);
+  loadAndRenderChart(key, score, submitPromise);
 }
 
-async function loadAndRenderChart(dateKey, myScore) {
+async function loadAndRenderChart(dateKey, myScore, submitPromise) {
   const slot = document.getElementById('scoreChartSlot');
   if (!slot) return;
   try {
-    const res = await fetch('/api/distribution?date=' + encodeURIComponent(dateKey));
+    // Wait for this player's own score to actually land before reading the
+    // distribution, otherwise a fast GET can race the POST and undercount
+    // (e.g. showing "you're the first" when someone else already played).
+    if (submitPromise) await submitPromise;
+    const res = await fetch('/api/distribution?date=' + encodeURIComponent(dateKey), { cache: 'no-store' });
     if (!res.ok) throw new Error('bad response');
     const { counts, total } = await res.json();
     slot.innerHTML = renderScoreChartHtml(counts, total, myScore);
