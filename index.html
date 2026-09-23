@@ -970,16 +970,26 @@ async function init() {
     return;
   }
 
+  // Today's 5 statements are pinned server-side the first time anyone asks
+  // for this date, so they can't change later even if the statement bank
+  // grows or the selection algorithm changes. Fall back to the old
+  // fully-client-side computation only if that endpoint is unreachable, so
+  // a backend hiccup never blocks the game.
   try {
-    const res = await fetch('/api/statements', { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch statements.json: ' + res.status);
-    STATEMENTS = await res.json();
+    const res = await fetch('/api/todays-puzzle?date=' + encodeURIComponent(key), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch todays-puzzle: ' + res.status);
+    todaysStatements = await res.json();
   } catch (e) {
-    renderLoadError();
-    return;
+    try {
+      const res = await fetch('/api/statements', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch statements.json: ' + res.status);
+      STATEMENTS = await res.json();
+    } catch (e2) {
+      renderLoadError();
+      return;
+    }
+    todaysStatements = getTodaysStatements();
   }
-
-  todaysStatements = getTodaysStatements();
 
   const alreadyToday = stats.lastPlayedDate === key;
   if (alreadyToday && stats.history[key]) {
