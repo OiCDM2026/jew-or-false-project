@@ -953,7 +953,7 @@ function renderLoadError() {
 async function init() {
   renderLoading();
   try {
-    const res = await fetch('festivals.json', { cache: 'no-store' });
+    const res = await fetch('/api/festivals', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch festivals.json: ' + res.status);
     FESTIVALS = await res.json();
   } catch (e) {
@@ -971,7 +971,7 @@ async function init() {
   }
 
   try {
-    const res = await fetch('statements.json', { cache: 'no-store' });
+    const res = await fetch('/api/statements', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch statements.json: ' + res.status);
     STATEMENTS = await res.json();
   } catch (e) {
