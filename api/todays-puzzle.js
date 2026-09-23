@@ -16,6 +16,19 @@ const STATEMENTS = require('../statements.json');
 const REST_URL = process.env.KV_REST_API_URL;
 const REST_TOKEN = process.env.KV_REST_API_TOKEN;
 
+// Manual overrides, by date key: statement ids to use instead of running the
+// live algorithm, in display order. Puzzle numbering launched on 2026-09-22,
+// making 2026-09-23 the first day "Puzzle #2" ever existed. In that same
+// window, two follow-up changes (the 30-day no-repeat logic, and three new
+// content batches growing the bank) shifted what the live algorithm computes
+// for that date away from the set that was actually shown and discussed
+// during launch testing. Pinning it here keeps that specific date on the
+// original launch-week content rather than whatever the algorithm would
+// produce today.
+const OVERRIDES = {
+  '2026-09-23': ['s0461', 's0042', 's0122', 's0424', 's0002'],
+};
+
 const EPOCH = new Date('2026-09-22T00:00:00Z'); // launch day = Puzzle #1
 const NO_REPEAT_DAYS = 30;
 
@@ -142,7 +155,11 @@ module.exports = async (req, res) => {
     }
   }
 
-  const picks = computeStatementsForKey(date);
+  const byId = {};
+  STATEMENTS.forEach(s => { byId[s.id] = s; });
+  const picks = OVERRIDES[date]
+    ? OVERRIDES[date].map(id => byId[id]).filter(Boolean)
+    : computeStatementsForKey(date);
 
   if (REST_URL && REST_TOKEN) {
     try {
