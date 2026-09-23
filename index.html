@@ -953,7 +953,7 @@ function renderLoadError() {
 async function init() {
   renderLoading();
   try {
-    const res = await fetch('festivals.json');
+    const res = await fetch('festivals.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch festivals.json: ' + res.status);
     FESTIVALS = await res.json();
   } catch (e) {
@@ -971,7 +971,7 @@ async function init() {
   }
 
   try {
-    const res = await fetch('statements.json');
+    const res = await fetch('statements.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch statements.json: ' + res.status);
     STATEMENTS = await res.json();
   } catch (e) {
@@ -989,6 +989,17 @@ async function init() {
     renderQuestion();
   }
 }
+
+// Mobile browsers (Safari especially) often restore a backgrounded tab
+// from their back-forward cache instead of re-running any JS — meaning
+// someone who opens the site, backgrounds it, and reopens it the next day
+// can see yesterday's already-computed puzzle frozen on screen. Detect that
+// restoration and force a real reload so "today" always gets recomputed.
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    location.reload();
+  }
+});
 
 init();
 </script>
