@@ -304,6 +304,16 @@
     margin: 18px 0;
   }
 
+  .card-url {
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-soft);
+    margin: 0 0 4px;
+  }
+
   .stats-row {
     display: flex;
     justify-content: space-around;
@@ -803,6 +813,9 @@ function renderResults(score, answersArr, submitPromise) {
     '</div>';
   }).join('');
 
+  const canNativeShare = typeof navigator.share === 'function';
+  const shareLabel = canNativeShare ? 'Share my result' : 'Copy result to share';
+
   gameArea.innerHTML =
     '<div class="card">' +
       '<p class="eyebrow">Puzzle #' + puzzleNum + '</p>' +
@@ -811,12 +824,13 @@ function renderResults(score, answersArr, submitPromise) {
         '<div class="of-five">' + resultMessage(score) + '</div>' +
       '</div>' +
       '<div class="emoji-grid">' + grid + '</div>' +
+      '<p class="card-url">jew-or-false.com</p>' +
       '<div class="stats-row">' +
         '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak</div></div>' +
         '<div class="stat"><div class="num">' + avg + '%</div><div class="label">Accuracy</div></div>' +
       '</div>' +
       '<div id="scoreChartSlot"></div>' +
-      '<button class="share-btn" id="shareBtn">Copy result to share</button>' +
+      '<button class="share-btn" id="shareBtn">' + shareLabel + '</button>' +
       '<div class="copied-note" id="copiedNote"></div>' +
       '<div class="review-list">' + reviewHtml + '</div>' +
       '<a class="beigel-link" href="https://buymeacoffee.com/jeworfalse" target="_blank" rel="noopener">Help my beigel fund 🥯</a>' +
@@ -824,6 +838,15 @@ function renderResults(score, answersArr, submitPromise) {
 
   document.getElementById('shareBtn').addEventListener('click', async () => {
     const text = buildShareText(score, answersArr).replace(/\\n/g, '\n');
+    if (canNativeShare) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // user cancelled the share sheet
+        // otherwise fall through to the clipboard fallback below
+      }
+    }
     try {
       await navigator.clipboard.writeText(text);
       document.getElementById('copiedNote').textContent = 'Copied to clipboard.';
