@@ -627,30 +627,46 @@ function findFestivalBreakNow() {
   return null;
 }
 
-// Looks for a pause (festival or Shabbat) whose evening-break window starts
-// later today, so players get a heads-up on the day before rather than
-// just hitting a closed screen with no warning. Returns null once today's
-// own break window has actually started (the closed-state cards above take
-// over at that point) or if no pause starts tonight.
+// Looks for a pause (festival or Shabbat) starting soon, so players get a
+// real day of advance notice rather than only a same-evening heads-up that's
+// easy to miss if they don't happen to open the site that exact afternoon.
+// Shows on both the full day before the break's eve (worded "tomorrow
+// evening") and the eve itself, until it actually starts (worded "this
+// evening" — the closed-state cards above take over once it does). Each
+// calendar day's notice gets its own id (via todayK) so dismissing one day's
+// version doesn't suppress the next day's.
 function findUpcomingPause() {
   const now = new Date();
-  if (now.getHours() >= EVENING_BREAK_START_HOUR) return null;
-
   const todayK = todayKey();
+  const tomorrowK = keyFromDate(addDays(dateFromKey(todayK), 1));
 
-  const festival = FESTIVALS.find(f => keyFromDate(addDays(dateFromKey(f.start), -1)) === todayK);
+  const festival = FESTIVALS.find(f => {
+    const eveKey = keyFromDate(addDays(dateFromKey(f.start), -1));
+    return eveKey === todayK || eveKey === tomorrowK;
+  });
   if (festival) {
+    const eveKey = keyFromDate(addDays(dateFromKey(festival.start), -1));
+    const isEveToday = eveKey === todayK;
+    if (isEveToday && now.getHours() >= EVENING_BREAK_START_HOUR) return null;
     return {
-      id: 'festival-' + festival.start,
-      title: 'Heads up — pausing this evening for ' + festival.name,
+      id: 'festival-' + festival.start + '-' + todayK,
+      title: 'Heads up — pausing ' + (isEveToday ? 'this evening' : 'tomorrow evening') + ' for ' + festival.name,
       text: FESTIVAL_EXPLAINERS[festival.name] || '',
     };
   }
 
-  if (now.getDay() === 5) {
+  const dow = now.getDay();
+  if (dow === 5 && now.getHours() < EVENING_BREAK_START_HOUR) {
     return {
       id: 'shabbat-' + todayK,
       title: 'Heads up — pausing this evening for Shabbat',
+      text: SHABBAT_EXPLAINER,
+    };
+  }
+  if (dow === 4) {
+    return {
+      id: 'shabbat-' + todayK,
+      title: 'Heads up — pausing tomorrow evening for Shabbat',
       text: SHABBAT_EXPLAINER,
     };
   }
