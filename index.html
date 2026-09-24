@@ -211,6 +211,49 @@
     margin: 0 0 26px;
   }
 
+  .explainer {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+    margin: -14px 0 26px;
+  }
+
+  .pause-notice {
+    position: relative;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 14px 40px 14px 16px;
+    margin-bottom: 16px;
+  }
+  .pause-notice-title {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0 0 4px;
+  }
+  .pause-notice-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-ink-soft);
+    margin: 0;
+  }
+  .pause-notice-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--color-ink-soft);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .pause-notice-close:hover { color: var(--color-ink); }
+
   .choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -467,6 +510,7 @@
     </div>
     <div class="streak-badge" id="streakBadge">0 day streak</div>
   </header>
+  <div id="pauseNotice"></div>
   <main id="gameArea"></main>
   <footer>
     <p>A new set of five, every day.</p>
@@ -478,6 +522,21 @@ let STATEMENTS = [];
 let FESTIVALS = [];
 
 const STORAGE_KEY = 'jew-or-false-stats-v1';
+const PAUSE_NOTICE_DISMISSED_KEY = 'jew-or-false-pause-notice-dismissed';
+
+const SHABBAT_EXPLAINER = "Shabbat is the weekly day of rest, from Friday sundown to Saturday nightfall, when observant Jews step back from ordinary activity — including this game.";
+
+// One factual, neutral line per festival — keyed by the "name" field in
+// festivals.json — shown on both the upcoming-pause notice and the closed
+// card itself, so players see why the site is paused, not just that it is.
+const FESTIVAL_EXPLAINERS = {
+  'Rosh Hashanah': 'The Jewish New Year — two days of reflection, prayer, and the sounding of the shofar.',
+  'Yom Kippur': 'The Day of Atonement, the most solemn day in the Jewish year, observed with a full day of fasting and prayer.',
+  'Sukkot': 'The Festival of Booths, recalling the temporary shelters used during the 40 years in the desert after the Exodus.',
+  'Shemini Atzeret / Simchat Torah': "The festival closing out Sukkot, marking the end of the year's Torah reading and the start of a new cycle.",
+  'Passover': 'Pesach commemorates the Exodus from slavery in Egypt, marked with a retelling of the story at the Seder table.',
+  'Shavuot': 'Marks the giving of the Torah at Mount Sinai, celebrated seven weeks after Passover.',
+};
 const EPOCH = new Date('2026-09-22T00:00:00Z'); // launch day = Puzzle #1
 
 function todayKey() {
@@ -566,6 +625,61 @@ function findFestivalBreakNow() {
     if (now >= start && now < end) return f;
   }
   return null;
+}
+
+// Looks for a pause (festival or Shabbat) whose evening-break window starts
+// later today, so players get a heads-up on the day before rather than
+// just hitting a closed screen with no warning. Returns null once today's
+// own break window has actually started (the closed-state cards above take
+// over at that point) or if no pause starts tonight.
+function findUpcomingPause() {
+  const now = new Date();
+  if (now.getHours() >= EVENING_BREAK_START_HOUR) return null;
+
+  const todayK = todayKey();
+
+  const festival = FESTIVALS.find(f => keyFromDate(addDays(dateFromKey(f.start), -1)) === todayK);
+  if (festival) {
+    return {
+      id: 'festival-' + festival.start,
+      title: 'Heads up — pausing this evening for ' + festival.name,
+      text: FESTIVAL_EXPLAINERS[festival.name] || '',
+    };
+  }
+
+  if (now.getDay() === 5) {
+    return {
+      id: 'shabbat-' + todayK,
+      title: 'Heads up — pausing this evening for Shabbat',
+      text: SHABBAT_EXPLAINER,
+    };
+  }
+
+  return null;
+}
+
+function renderPauseNotice() {
+  const el = document.getElementById('pauseNotice');
+  if (!el) return;
+
+  const upcoming = findUpcomingPause();
+  if (!upcoming) { el.innerHTML = ''; return; }
+
+  let dismissed = null;
+  try { dismissed = localStorage.getItem(PAUSE_NOTICE_DISMISSED_KEY); } catch (e) {}
+  if (dismissed === upcoming.id) { el.innerHTML = ''; return; }
+
+  el.innerHTML =
+    '<div class="pause-notice">' +
+      '<button class="pause-notice-close" id="pauseNoticeClose" aria-label="Dismiss">&times;</button>' +
+      '<p class="pause-notice-title">' + upcoming.title + '</p>' +
+      '<p class="pause-notice-text">' + upcoming.text + '</p>' +
+    '</div>';
+
+  document.getElementById('pauseNoticeClose').addEventListener('click', () => {
+    try { localStorage.setItem(PAUSE_NOTICE_DISMISSED_KEY, upcoming.id); } catch (e) {}
+    el.innerHTML = '';
+  });
 }
 
 function dayNumberForKey(k) {
@@ -938,10 +1052,12 @@ function renderLoading() {
 }
 
 function renderFestivalClosed(festival) {
+  const explainer = FESTIVAL_EXPLAINERS[festival.name] || '';
   gameArea.innerHTML =
     '<div class="card">' +
       '<p class="eyebrow">Chag Sameach</p>' +
       '<p class="statement">It\'s ' + festival.name + ' — a day of rest, so there\'s no puzzle until after nightfall.</p>' +
+      (explainer ? '<p class="explainer">' + explainer + '</p>' : '') +
       '<div class="stats-row">' +
         '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak (safe)</div></div>' +
       '</div>' +
@@ -953,6 +1069,7 @@ function renderShabbatBreak() {
     '<div class="card">' +
       '<p class="eyebrow">Shabbat Shalom</p>' +
       '<p class="statement">The site is taking a break for Shabbat — no puzzle until after Havdalah.</p>' +
+      '<p class="explainer">' + SHABBAT_EXPLAINER + '</p>' +
       '<div class="stats-row">' +
         '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak (safe)</div></div>' +
       '</div>' +
@@ -978,6 +1095,8 @@ async function init() {
   } catch (e) {
     FESTIVALS = []; // fail open: don't block the game over a festival-data hiccup
   }
+
+  renderPauseNotice();
 
   const festival = findFestivalBreakNow();
   if (festival) {
