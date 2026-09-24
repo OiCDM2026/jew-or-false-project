@@ -500,8 +500,13 @@ function addDays(d, n) {
   return copy;
 }
 
-// Festivals block the whole calendar day. Data comes from festivals.json
-// (major Yom Tov days, diaspora two-day schedule) via the Hebcal API.
+// Whole-calendar-day check used only for streak bookkeeping below — a date
+// counts as a festival date if it falls within any range in festivals.json
+// (major Yom Tov days, diaspora two-day schedule, via the Hebcal API). This
+// stays date-based (not time-of-day) so a day is simply closed-or-not for
+// streak purposes, mirroring how only Saturday (not Friday evening) counts
+// as a closed date for Shabbat below even though its live break window
+// starts Friday evening.
 function findFestivalForKey(k) {
   return FESTIVALS.find(f => k >= f.start && k <= f.end) || null;
 }
@@ -529,18 +534,38 @@ function lastOpenDayBefore(todayKeyStr) {
   return null;
 }
 
-// Shabbat break is a real-time window (not a full closed calendar date),
-// approximated with a fixed local-clock window rather than true sunset/
-// nightfall, which vary by location and season.
-const SHABBAT_BREAK_START_HOUR = 18; // Friday, approx candle-lighting
-const SHABBAT_BREAK_END_HOUR = 20;   // Saturday, approx Havdalah
+// Both Shabbat and festival breaks are real-time evening-to-evening windows
+// (not full closed calendar dates), approximated with a fixed local-clock
+// window rather than true sunset/nightfall, which vary by location and
+// season.
+const EVENING_BREAK_START_HOUR = 18; // approx candle-lighting
+const EVENING_BREAK_END_HOUR = 20;   // approx Havdalah / nightfall
+
 function isShabbatBreakNow() {
   const now = new Date();
   const dow = now.getDay();
   const hour = now.getHours();
-  if (dow === 5 && hour >= SHABBAT_BREAK_START_HOUR) return true;
-  if (dow === 6 && hour < SHABBAT_BREAK_END_HOUR) return true;
+  if (dow === 5 && hour >= EVENING_BREAK_START_HOUR) return true;
+  if (dow === 6 && hour < EVENING_BREAK_END_HOUR) return true;
   return false;
+}
+
+// A festival's real closure window runs from the evening before its first
+// date (candle-lighting) to the evening of its last date (nightfall) — e.g.
+// a 2-day Yom Tov starting 2025-09-23 closes the site from 2025-09-22 18:00
+// through 2025-09-24 20:00, not the flat 09-23–09-24 calendar range used for
+// streak bookkeeping above.
+function findFestivalBreakNow() {
+  const now = new Date();
+  for (const f of FESTIVALS) {
+    const start = dateFromKey(f.start);
+    start.setDate(start.getDate() - 1);
+    start.setHours(EVENING_BREAK_START_HOUR, 0, 0, 0);
+    const end = dateFromKey(f.end);
+    end.setHours(EVENING_BREAK_END_HOUR, 0, 0, 0);
+    if (now >= start && now < end) return f;
+  }
+  return null;
 }
 
 function dayNumberForKey(k) {
@@ -912,20 +937,14 @@ function renderLoading() {
   gameArea.innerHTML = '<div class="card"><p class="eyebrow">Loading today\'s statements&hellip;</p></div>';
 }
 
-function formatBackDate(k) {
-  return dateFromKey(k).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-}
-
 function renderFestivalClosed(festival) {
-  const backKey = keyFromDate(addDays(dateFromKey(festival.end), 1));
   gameArea.innerHTML =
     '<div class="card">' +
       '<p class="eyebrow">Chag Sameach</p>' +
-      '<p class="statement">It\'s ' + festival.name + ' — a day of rest, so there\'s no puzzle today.</p>' +
+      '<p class="statement">It\'s ' + festival.name + ' — a day of rest, so there\'s no puzzle until after nightfall.</p>' +
       '<div class="stats-row">' +
         '<div class="stat"><div class="num">' + stats.currentStreak + '</div><div class="label">Streak (safe)</div></div>' +
       '</div>' +
-      '<div class="copied-note" style="height:auto;">Back ' + formatBackDate(backKey) + '.</div>' +
     '</div>';
 }
 
@@ -960,7 +979,7 @@ async function init() {
     FESTIVALS = []; // fail open: don't block the game over a festival-data hiccup
   }
 
-  const festival = findFestivalForKey(key);
+  const festival = findFestivalBreakNow();
   if (festival) {
     renderFestivalClosed(festival);
     return;
