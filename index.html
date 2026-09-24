@@ -238,6 +238,12 @@
     color: var(--color-ink-soft);
     margin: 0;
   }
+  .pause-notice-streak {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-true);
+    margin: 8px 0 0;
+  }
   .pause-notice-close {
     position: absolute;
     top: 8px;
@@ -690,6 +696,7 @@ function renderPauseNotice() {
       '<button class="pause-notice-close" id="pauseNoticeClose" aria-label="Dismiss">&times;</button>' +
       '<p class="pause-notice-title">' + upcoming.title + '</p>' +
       '<p class="pause-notice-text">' + upcoming.text + '</p>' +
+      '<p class="pause-notice-streak">Your streak is safe — missing a paused day never breaks it.</p>' +
     '</div>';
 
   document.getElementById('pauseNoticeClose').addEventListener('click', () => {
