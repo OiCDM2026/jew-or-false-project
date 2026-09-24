@@ -566,25 +566,34 @@ function addDays(d, n) {
 }
 
 // Whole-calendar-day check used only for streak bookkeeping below — a date
-// counts as a festival date if it falls within any range in festivals.json
-// (major Yom Tov days, diaspora two-day schedule, via the Hebcal API). This
-// stays date-based (not time-of-day) so a day is simply closed-or-not for
-// streak purposes, mirroring how only Saturday (not Friday evening) counts
-// as a closed date for Shabbat below even though its live break window
-// starts Friday evening.
+// counts as a festival date if it falls within festivals.json's listed
+// start-end range, OR is the eve day before it (the day whose evening the
+// real break actually starts on — see findFestivalBreakNow). Data comes
+// from festivals.json (major Yom Tov days, diaspora two-day schedule, via
+// the Hebcal API). This stays date-based (not time-of-day): a whole day
+// either counts as safe to skip or it doesn't, mirroring how Friday and
+// Saturday both count as closed dates for Shabbat below even though the
+// break only starts partway through Friday.
 function findFestivalForKey(k) {
-  return FESTIVALS.find(f => k >= f.start && k <= f.end) || null;
+  return FESTIVALS.find(f => {
+    const eveKey = keyFromDate(addDays(dateFromKey(f.start), -1));
+    return k === eveKey || (k >= f.start && k <= f.end);
+  }) || null;
+}
+
+function isFridayKey(k) {
+  return dateFromKey(k).getDay() === 5;
 }
 
 function isSaturdayKey(k) {
   return dateFromKey(k).getDay() === 6;
 }
 
-// A date counts as "closed" for streak purposes if it's a festival day or
-// a Saturday (Shabbat) — both are days the site intentionally has no game,
-// so missing one shouldn't break a streak.
+// A date counts as "closed" for streak purposes if it's within a festival's
+// full span (including its eve day) or is Friday/Saturday (Shabbat) — days
+// the site intentionally pauses for, so missing one shouldn't break a streak.
 function isClosedDateForStreak(k) {
-  return !!findFestivalForKey(k) || isSaturdayKey(k);
+  return !!findFestivalForKey(k) || isFridayKey(k) || isSaturdayKey(k);
 }
 
 // Walks backward from (but not including) today, skipping closed dates,
@@ -911,7 +920,14 @@ function handleAnswer(pickedTrue, s) {
 function finishGame() {
   const score = answers.filter(a => a.correct).length;
 
-  const continuesStreak = stats.lastPlayedDate === lastOpenDayBefore(key);
+  // >= rather than === : lastOpenDayBefore(key) is the most recent day that
+  // MUST have been played, but if the player actually played on a later
+  // closed day too (e.g. squeezed in Friday's puzzle before the Shabbat
+  // break), that still keeps the streak — only a gap that skips the
+  // required open day itself breaks it. ISO date-key strings sort
+  // chronologically, so string comparison is safe here.
+  const requiredDay = lastOpenDayBefore(key);
+  const continuesStreak = stats.lastPlayedDate !== null && stats.lastPlayedDate >= requiredDay;
   const alreadyToday = stats.lastPlayedDate === key;
   let submitPromise = null;
   if (!alreadyToday) {
