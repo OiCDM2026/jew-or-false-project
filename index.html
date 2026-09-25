@@ -817,7 +817,9 @@ function getTodaysStatements() {
     cursor = addDays(cursor, 1);
   }
 
-  return todaysPicks;
+  // Selection (above) is unaffected by display order — only the final day's
+  // picks are sorted, easiest to hardest, for the actual puzzle sequence.
+  return todaysPicks.slice().sort((a, b) => a.difficulty - b.difficulty);
 }
 
 function loadStats() {
@@ -861,12 +863,23 @@ function renderProgress() {
   return '<div class="progress">' + dots.join('') + '</div>';
 }
 
+// Displayed difficulty is a coarser 3-tier label over the underlying 1-5
+// rating used for sorting, since "Easy/Medium/Hard" reads more naturally to
+// players than a raw number. Returns '' for a statement with no rating
+// (already-pinned puzzles from before difficulty tagging existed), rather
+// than guessing.
+function difficultyLabel(n) {
+  if (!n) return '';
+  return n <= 2 ? 'Easy' : n === 3 ? 'Medium' : 'Hard';
+}
+
 function renderQuestion() {
   const s = todaysStatements[currentIndex];
+  const diffLabel = difficultyLabel(s.difficulty);
   gameArea.innerHTML =
     renderProgress() +
     '<div class="card">' +
-      '<p class="eyebrow">Puzzle #' + puzzleNum + ' &middot; Statement ' + (currentIndex + 1) + ' of 5</p>' +
+      '<p class="eyebrow">Puzzle #' + puzzleNum + ' &middot; Statement ' + (currentIndex + 1) + ' of 5' + (diffLabel ? ' &middot; ' + diffLabel : '') + '</p>' +
       '<p class="statement">' + s.statement + '</p>' +
       '<div class="choices">' +
         '<button class="choice-btn jew" id="btnJew">Jew</button>' +

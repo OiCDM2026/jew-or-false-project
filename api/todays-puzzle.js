@@ -124,7 +124,9 @@ function computeStatementsForKey(targetKey) {
     cursor = addDays(cursor, 1);
   }
 
-  return todaysPicks;
+  // Selection (above) is unaffected by display order — only the final day's
+  // picks are sorted, easiest to hardest, for the actual puzzle sequence.
+  return todaysPicks.slice().sort((a, b) => a.difficulty - b.difficulty);
 }
 
 module.exports = async (req, res) => {
