@@ -766,6 +766,10 @@ function statementGroupKey(s) {
 // pure function of the current STATEMENTS array and today's date — nothing
 // is stored server-side. Cheap even over years of daily replay (a handful of
 // array shuffles per simulated day).
+function isEasy(s) { return s.difficulty <= 2; }
+function isMedium(s) { return s.difficulty === 3; }
+function isHard(s) { return s.difficulty >= 4; }
+
 function getTodaysStatements() {
   const byCategory = {};
   STATEMENTS.forEach(s => {
@@ -788,28 +792,53 @@ function getTodaysStatements() {
     }
 
     const categories = shuffleWithRng(Object.keys(byCategory), rng);
+    // Shuffle each category's pool once, up front, so every pick below for
+    // this day (tier-guarantee picks and the fill-in picks after) draws
+    // from the same fixed, already-randomized order.
+    const shuffledPools = {};
+    categories.forEach(cat => { shuffledPools[cat] = shuffleWithRng(byCategory[cat], rng); });
+
     const picked = [];
     const usedToday = new Set();
+    const usedCategories = new Set();
 
-    for (const cat of categories) {
-      if (picked.length >= 5) break;
-      const pool = shuffleWithRng(byCategory[cat], rng);
-      const choice = pool.find(s => !excluded.has(statementGroupKey(s)) && !usedToday.has(statementGroupKey(s)));
-      if (!choice) continue; // nothing fresh in this category right now — skip it, try another
-      picked.push(choice);
-      usedToday.add(statementGroupKey(choice));
+    // requireFreshCategory: true tries to keep the 5 picks spread across
+    // different categories (matching the original design); false allows
+    // reusing a category once every fresh one has been tried and failed.
+    function tryPick(tierCheck, requireFreshCategory) {
+      for (const cat of categories) {
+        if (requireFreshCategory && usedCategories.has(cat)) continue;
+        const choice = shuffledPools[cat].find(s =>
+          tierCheck(s) && !excluded.has(statementGroupKey(s)) && !usedToday.has(statementGroupKey(s))
+        );
+        if (choice) { picked.push(choice); usedToday.add(statementGroupKey(choice)); usedCategories.add(cat); return true; }
+      }
+      return false;
+    }
+    // Last resort: ignore the 30-day exclusion window (only matters if a
+    // tier is running low on fresh options, e.g. a very small bank).
+    function tryPickRelaxed(tierCheck) {
+      for (const cat of categories) {
+        const choice = shuffledPools[cat].find(s => tierCheck(s) && !usedToday.has(statementGroupKey(s)));
+        if (choice) { picked.push(choice); usedToday.add(statementGroupKey(choice)); usedCategories.add(cat); return true; }
+      }
+      return false;
     }
 
-    // Fallback (only matters for a very small bank): if categories ran out
-    // of 30-day-fresh options before reaching 5, relax to "not already
-    // picked today" so the game never breaks.
-    if (picked.length < 5) {
-      for (const cat of categories) {
-        if (picked.length >= 5) break;
-        const pool = shuffleWithRng(byCategory[cat], rng);
-        const choice = pool.find(s => !usedToday.has(statementGroupKey(s)));
-        if (choice) { picked.push(choice); usedToday.add(statementGroupKey(choice)); }
-      }
+    // Guarantee at least one Easy, one Medium, one Hard statement — order
+    // shuffled per day so no tier always gets first pick of fresh categories.
+    shuffleWithRng([isEasy, isMedium, isHard], rng).forEach(tierCheck => {
+      tryPick(tierCheck, true) || tryPick(tierCheck, false) || tryPickRelaxed(tierCheck);
+    });
+
+    // Fill the remaining slots with any difficulty, still preferring
+    // categories not already used today.
+    const anyTier = () => true;
+    while (picked.length < 5) {
+      if (tryPick(anyTier, true)) continue;
+      if (tryPick(anyTier, false)) continue;
+      if (tryPickRelaxed(anyTier)) continue;
+      break; // bank too small to fill further — never happens at current size
     }
 
     history.push(picked.map(statementGroupKey));
