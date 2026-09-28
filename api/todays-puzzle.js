@@ -27,6 +27,13 @@ const REST_TOKEN = process.env.KV_REST_API_TOKEN;
 // produce today.
 const OVERRIDES = {
   '2026-09-23': ['s0461', 's0042', 's0122', 's0424', 's0002'],
+  // s0042 (pairId 21, "The Star of David... is a widely recognized symbol
+  // of Judaism") was already used on 2026-09-23 via the override above, but
+  // the no-repeat replay didn't know that (see the OVERRIDES check inside
+  // computeStatementsForKey) and picked it again 5 days later. Swapped for
+  // s1031, an unused, same-difficulty (1), same-category (symbols)
+  // statement, to correct the already-pinned 2026-09-28 puzzle.
+  '2026-09-28': ['s0103', 's1031', 's0507', 's0306', 's0955'],
 };
 
 const EPOCH = new Date('2026-09-22T00:00:00Z'); // launch day = Puzzle #1
@@ -83,8 +90,10 @@ function isHard(s) { return s.difficulty >= 4; }
 
 function computeStatementsForKey(targetKey) {
   const byCategory = {};
+  const byId = {};
   STATEMENTS.forEach(s => {
     (byCategory[s.category] = byCategory[s.category] || []).push(s);
+    byId[s.id] = s;
   });
 
   const totalDays = dayNumberForKey(targetKey);
@@ -94,6 +103,24 @@ function computeStatementsForKey(targetKey) {
 
   for (let dayIdx = 1; dayIdx <= totalDays; dayIdx++) {
     const dKey = keyFromDate(cursor);
+
+    // An override must be applied here, inside the replay, not only for the
+    // final target day — this loop rebuilds the no-repeat exclusion history
+    // from scratch every call by re-simulating every prior day with the
+    // *current* algorithm. A day that was actually shown via an override
+    // (e.g. 2026-09-23's launch-week fix below) doesn't match what the live
+    // algorithm would have picked for it, so skipping the override here left
+    // its real statements invisible to later days' no-repeat checks — which
+    // is exactly how the Star of David statement (s0042) resurfaced on
+    // 2026-09-28, only 5 days after it actually ran on 2026-09-23.
+    if (OVERRIDES[dKey]) {
+      const picked = OVERRIDES[dKey].map(id => byId[id]).filter(Boolean);
+      history.push(picked.map(statementGroupKey));
+      todaysPicks = picked;
+      cursor = addDays(cursor, 1);
+      continue;
+    }
+
     const rng = mulberry32(seedFromDateKey(dKey));
 
     const excluded = new Set();
