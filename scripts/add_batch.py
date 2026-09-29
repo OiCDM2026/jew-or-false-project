@@ -1,7 +1,10 @@
-"""Append a batch of (category, true, false, explanation) pairs to statements.json.
+"""Append a batch of (category, true, false, explanation, difficulty) pairs to
+statements.json. difficulty is 1-5 (see index.html's difficultyLabel: 1-2
+Easy, 3 Medium, 4-5 Hard) and is shared by both the true and false side of
+the pair, matching every existing entry in the bank.
 
 Usage: python3 scripts/add_batch.py scripts/batch_002_pairs.py
-The batch module must define a top-level PAIRS list of 4-tuples.
+The batch module must define a top-level PAIRS list of 5-tuples.
 """
 import json
 import sys
@@ -39,7 +42,10 @@ def main():
     seen_in_batch = set()
     errors = []
 
-    for i, (category, true_stmt, false_stmt, explanation) in enumerate(pairs):
+    for i, (category, true_stmt, false_stmt, explanation, difficulty) in enumerate(pairs):
+        if difficulty not in (1, 2, 3, 4, 5):
+            errors.append(f"Invalid difficulty (pair {i}): {difficulty!r}")
+
         for stmt in (true_stmt, false_stmt):
             key = stmt.strip().lower()
             if key in existing_texts:
@@ -59,6 +65,7 @@ def main():
                 "statement": stmt,
                 "isTrue": is_true,
                 "explanation": explanation,
+                "difficulty": difficulty,
             })
             next_id += 1
 
