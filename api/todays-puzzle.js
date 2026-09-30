@@ -34,6 +34,13 @@ const OVERRIDES = {
   // s1031, an unused, same-difficulty (1), same-category (symbols)
   // statement, to correct the already-pinned 2026-09-28 puzzle.
   '2026-09-28': ['s0103', 's1031', 's0507', 's0306', 's0955'],
+  // pairId 291 ("the number seven/twelve recurs...") largely restated two
+  // facts already separately tested elsewhere (Sheva Brachot's 7 wedding
+  // blessings, pairId 153; the bride circling the groom 7 times, pairId
+  // 206) — removed from the bank entirely as a content duplicate. Swapped
+  // for s0976, an unused, same-difficulty (2), same-category (symbols)
+  // statement, to correct the already-pinned 2026-09-30 puzzle.
+  '2026-09-30': ['s0297', 's0976', 's0594', 's0353', 's0679'],
 };
 
 const EPOCH = new Date('2026-09-22T00:00:00Z'); // launch day = Puzzle #1
